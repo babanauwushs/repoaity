@@ -1,0 +1,106 @@
+<!DOCTYPE html>
+<html lang="{{ language }}">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="{{ t('Хичээлийн долоо хоногийн хуваарийг удирдах.') }}">
+    <title>{{ t('Хичээлийн хуваарь засах') }} | {{ t('Админ') }} | {{ site_name }}</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css', v=62) }}">
+</head>
+<body>
+    {% include "_header.html" %}
+    <main class="admin-page">
+        <div class="admin-heading">
+            <span class="eyebrow blue">{{ t('УДИРДЛАГА') }}</span>
+            <h2>{{ t('Хичээлийн хуваарь засах') }}</h2>
+            <p>{{ t('Өдөр, цагийн нүд бүрд хичээл, багш, өрөөг оруулаад хадгална. Хадгалсан мэдээлэл суралцагчдад харагдана.') }}</p>
+            <a class="text-link" href="{{ url_for('admin') }}">{{ t('← Админ самбар руу буцах') }}</a>
+        </div>
+        {% include "_flashes.html" %}
+
+        <section class="admin-section schedule-class-management" aria-labelledby="schedule-classes-title">
+            <h3 id="schedule-classes-title">{{ t('Анги удирдах') }}</h3>
+            <form class="schedule-class-form" action="{{ url_for('create_schedule_class') }}" method="post">
+                <input type="hidden" name="csrf_token" value="{{ csrf_token }}">
+                <label for="schedule-class-name">{{ t('Ангийн нэр') }}</label>
+                <input id="schedule-class-name" name="name" maxlength="100" required
+                       placeholder="{{ t('Жишээ: 1А анги') }}">
+                <button class="admin-button" type="submit">{{ t('Анги нэмэх') }}</button>
+            </form>
+            {% if classes %}
+            <form class="schedule-class-picker schedule-admin-class-picker" action="{{ url_for('admin_schedule') }}" method="get">
+                <label for="admin-schedule-class">{{ t('Хуваарь засах анги') }}</label>
+                <select id="admin-schedule-class" name="class_id">
+                    {% for class_item in classes %}
+                    <option value="{{ class_item.id }}" {% if selected_class and class_item.id == selected_class.id %}selected{% endif %}>
+                        {{ class_item.name }}
+                    </option>
+                    {% endfor %}
+                </select>
+                <button class="admin-button" type="submit">{{ t('Сонгох') }}</button>
+            </form>
+            {% endif %}
+        </section>
+
+        {% if selected_class %}
+        <section class="admin-section schedule-admin-section" aria-label="{{ t('Долоо хоногийн хичээлийн хуваарь') }}">
+            <div class="schedule-admin-title">
+                <h3>{{ selected_class.name }} · {{ t('Долоо хоногийн хичээлийн хуваарь') }}</h3>
+                <form action="{{ url_for('delete_schedule_class', class_id=selected_class.id) }}"
+                      method="post" onsubmit="return confirm('{{ t('Энэ анги болон хуваарийг устгах уу?') }}');">
+                    <input type="hidden" name="csrf_token" value="{{ csrf_token }}">
+                    <button class="admin-button danger" type="submit">{{ t('Анги устгах') }}</button>
+                </form>
+            </div>
+            <div class="schedule-table-wrap">
+                <table class="schedule-table schedule-admin-table">
+                    <caption>{{ t('Долоо хоногийн хичээлийн хуваарь') }}</caption>
+                    <thead>
+                        <tr>
+                            <th scope="col">{{ t('Цагийн дугаар') }}</th>
+                            {% for day in day_labels %}
+                            <th scope="col">{{ t(day) }}</th>
+                            {% endfor %}
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for period in range(1, 6) %}
+                        <tr>
+                            <th scope="row">{{ period }}</th>
+                            {% for day in range(5) %}
+                            {% set entry = schedule_entries.get((period, day)) %}
+                            <td>
+                                <form class="schedule-edit-form"
+                                      action="{{ url_for('update_class_schedule', class_id=selected_class.id, period=period, day=day) }}"
+                                      method="post">
+                                    <input type="hidden" name="csrf_token" value="{{ csrf_token }}">
+                                    <label class="visually-hidden" for="subject-{{ period }}-{{ day }}">{{ t('Хичээл') }}, {{ t(day_labels[day]) }}, {{ period }}</label>
+                                    <input id="subject-{{ period }}-{{ day }}" name="subject" maxlength="120"
+                                           placeholder="{{ t('Хичээл') }}" value="{{ entry.subject if entry else '' }}">
+                                    <label class="visually-hidden" for="teacher-{{ period }}-{{ day }}">{{ t('Багш') }}</label>
+                                    <input id="teacher-{{ period }}-{{ day }}" name="teacher" maxlength="100"
+                                           placeholder="{{ t('Багш') }}" value="{{ entry.teacher if entry else '' }}">
+                                    <label class="visually-hidden" for="room-{{ period }}-{{ day }}">{{ t('Өрөө') }}</label>
+                                    <input id="room-{{ period }}-{{ day }}" name="room" maxlength="40"
+                                           placeholder="{{ t('Өрөө') }}" value="{{ entry.room if entry else '' }}">
+                                    <div class="schedule-edit-actions">
+                                        <button class="admin-button" type="submit">{{ t('Хадгалах') }}</button>
+                                        {% if entry %}
+                                        <button class="admin-button danger" type="submit" name="action" value="delete">{{ t('Арилгах') }}</button>
+                                        {% endif %}
+                                    </div>
+                                </form>
+                            </td>
+                            {% endfor %}
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </section>
+        {% else %}
+        <p class="appointment-empty">{{ t('Хуваарь оруулахын тулд эхлээд анги нэмнэ үү.') }}</p>
+        {% endif %}
+    </main>
+</body>
+</html>

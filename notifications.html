@@ -1,0 +1,64 @@
+<!DOCTYPE html>
+<html lang="{{ language }}">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="{{ t('Шинэ мэдээ, зарлалын мэдэгдлүүд.') }}">
+    <title>{{ t('Мэдэгдэл') }} | {{ site_name }}</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css', v=62) }}">
+</head>
+<body>
+    {% include "_header.html" %}
+    <main class="section notification-page">
+        <header class="notification-heading">
+            <span class="eyebrow blue">{{ t('ШИНЭ МЭДЭЭ, ЗАРЛАЛ') }}</span>
+            <h2>{{ t('Мэдэгдэл') }}</h2>
+            <p>{{ t('Нийтлэгдсэн шинэ мэдээ болон зарлалууд энд харагдана.') }}</p>
+        </header>
+        {% if unread_notification_count %}
+        <form class="notification-read-all" action="{{ url_for('mark_all_notifications_read') }}" method="post">
+            <input type="hidden" name="csrf_token" value="{{ csrf_token }}">
+            <button class="button secondary" type="submit">{{ t('Бүгдийг уншсан гэж тэмдэглэх') }}</button>
+        </form>
+        {% endif %}
+        {% if notifications %}
+        <div class="notification-list">
+            {% for notification in notifications %}
+            <article class="notification-card{% if not notification.read_at %} notification-unread{% endif %}">
+                <div class="notification-card-copy">
+                    <span class="notification-category">
+                        {{ t('ЗАРЛАЛ') if notification.category == "announcement" else t('МЭДЭЭ') }}
+                        {% if not notification.read_at %}<span>{{ t('ШИНЭ') }}</span>{% endif %}
+                    </span>
+                    <h3>
+                        <a href="{{ url_for('news.detail', news_id=notification.news_id) }}">
+                            {{ notification.title }}
+                        </a>
+                    </h3>
+                    <p>{{ notification.summary }}</p>
+                    <time datetime="{{ notification.created_at|replace(' ', 'T') }}">
+                        {{ notification.created_at }}
+                    </time>
+                </div>
+                {% if not notification.read_at %}
+                <form action="{{ url_for('mark_notification_read', news_id=notification.news_id) }}" method="post">
+                    <input type="hidden" name="csrf_token" value="{{ csrf_token }}">
+                    <button class="notification-mark-read" type="submit">{{ t('Уншсан') }}</button>
+                </form>
+                {% endif %}
+            </article>
+            {% endfor %}
+        </div>
+        {% else %}
+        <p class="notification-empty">{{ t('Одоогоор мэдэгдэл алга.') }}</p>
+        {% endif %}
+        <a class="text-link notification-back-link" href="{{ url_for('news.list_news') }}">{{ t('Бүх мэдээ, зарлалыг үзэх →') }}</a>
+    </main>
+    <footer class="footer">
+        <a class="footer-brand" href="{{ url_for('index') }}">{{ t('Мэргэжлийн сургалт') }}</a>
+        <p>© {{ current_year }} {{ t('Бүх эрх хуулиар хамгаалагдсан.') }}</p>
+        <a class="footer-social" href="https://www.facebook.com/groups/718571728566109/" target="_blank" rel="noopener noreferrer">{{ t('Facebook хуудас ↗') }}</a>
+        <a class="back-top" href="#top">{{ t('Дээш буцах ↑') }}</a>
+    </footer>
+</body>
+</html>

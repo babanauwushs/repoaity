@@ -1,0 +1,63 @@
+<!DOCTYPE html>
+<html lang="{{ language }}">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="{{ t('Захиралтай уулзах сул цаг сонгон захиална уу.') }}">
+    <title>{{ t('Захиралтай уулзах цаг захиалах') }} | {{ site_name }}</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css', v=62) }}">
+</head>
+<body>
+    {% include "_header.html" %}
+    <main class="section appointments-page">
+        {% include "_flashes.html" %}
+        <header class="section-heading centered">
+            <span class="eyebrow blue">{{ t('СУРГУУЛИЙН УДИРДЛАГА') }}</span>
+            <h2>{{ t('Захиралтай уулзах цаг захиалах') }}</h2>
+            <p>{{ t('Өөрт тохирох 30 минутын сул цагийг сонгоод хүсэлтээ илгээнэ үү.') }} {{ t('Цаг Улаанбаатарын цагаар.') }}</p>
+        </header>
+
+        <section class="appointment-card" aria-labelledby="appointment-form-title">
+            <h3 id="appointment-form-title">{{ t('Уулзалтын мэдээлэл') }}</h3>
+            {% if slots %}
+            <form class="appointment-form" action="{{ url_for('appointments') }}" method="post">
+                <input type="hidden" name="csrf_token" value="{{ csrf_token }}">
+                <label for="appointment-slot">{{ t('Сул цаг') }}</label>
+                <select id="appointment-slot" name="slot_id" required>
+                    <option value="">{{ t('Цаг сонгоно уу') }}</option>
+                    {% for slot in slots %}
+                    <option value="{{ slot.id }}" {% if form_data.get('slot_id') == slot.id|string %}selected{% endif %}>
+                        {{ slot.starts_at }}
+                    </option>
+                    {% endfor %}
+                </select>
+
+                <label for="appointment-name">{{ t('Таны нэр') }}</label>
+                <input id="appointment-name" name="name" maxlength="100" autocomplete="name"
+                       value="{{ form_data.get('name', '') }}" required>
+
+                <label for="appointment-phone">{{ t('Утасны дугаар') }}</label>
+                <input id="appointment-phone" name="phone" type="tel" maxlength="24"
+                       autocomplete="tel" value="{{ form_data.get('phone', '') }}" required>
+
+                <label for="appointment-email">{{ t('Имэйл') }}</label>
+                <input id="appointment-email" name="email" type="email" maxlength="254"
+                       autocomplete="email" value="{{ form_data.get('email', '') }}" required>
+
+                <label for="appointment-reason">{{ t('Уулзалтын шалтгаан') }}</label>
+                <textarea id="appointment-reason" name="reason" maxlength="1000" rows="4" required>{{ form_data.get('reason', '') }}</textarea>
+                <button class="button primary" type="submit">{{ t('Цаг захиалах') }}</button>
+            </form>
+            {% else %}
+            <p class="appointment-empty">{{ t('Одоогоор захиалах сул цаг алга. Дараа дахин шалгана уу.') }}</p>
+            {% endif %}
+        </section>
+    </main>
+    <footer class="footer">
+        <a class="footer-brand" href="{{ url_for('index') }}">{{ t('Мэргэжлийн сургалт') }}</a>
+        <p>© {{ current_year }} {{ t('Бүх эрх хуулиар хамгаалагдсан.') }}</p>
+        <a class="footer-social" href="https://www.facebook.com/groups/718571728566109/" target="_blank" rel="noopener noreferrer">{{ t('Facebook хуудас ↗') }}</a>
+        <a class="back-top" href="#top">{{ t('Дээш буцах ↑') }}</a>
+    </footer>
+</body>
+</html>

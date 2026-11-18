@@ -1,0 +1,68 @@
+<!DOCTYPE html>
+<html lang="{{ language }}">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="{{ t('Суралцагчийн хувийн профайл.') }}">
+    <title>{{ t('Миний профайл') }} | {{ site_name }}</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css', v=62) }}">
+</head>
+<body>
+    {% include "_header.html" %}
+    <main class="section">
+        {% include "_flashes.html" %}
+        <section class="profile-page" aria-labelledby="student-title">
+            <header class="profile-heading">
+                <span class="eyebrow blue">{{ t('СУРАЛЦАГЧИЙН ХЭСЭГ') }}</span>
+                <h2 id="student-title">{{ t('Миний профайл') }}</h2>
+                <p>
+                    {{ t('Сайн байна уу, ') }}{{ current_user.full_name or current_user.username }}.
+                    {{ t('Хувийн мэдээллээ эндээс шинэчилнэ үү.') }}
+                </p>
+            </header>
+            <div class="profile-card">
+                <div class="profile-avatar" aria-hidden="true">
+                    {{ (current_user.full_name or current_user.username)[:1]|upper }}
+                </div>
+                <div class="profile-account">
+                    <span>{{ t('Нэвтрэх нэр') }}</span>
+                    <strong>{{ current_user.username }}</strong>
+                </div>
+                <form class="auth-form profile-form" method="post" action="{{ url_for('profile') }}">
+                    <input type="hidden" name="csrf_token" value="{{ csrf_token }}">
+                    <label for="profile-full-name">{{ t('Овог нэр') }}</label>
+                    <input
+                        id="profile-full-name" name="full_name" type="text" maxlength="100"
+                        autocomplete="name"
+                        value="{{ form_data.get('full_name', current_user.full_name or '') }}"
+                        required
+                    >
+                    <label for="profile-email">{{ t('Имэйл') }}</label>
+                    <input
+                        id="profile-email" name="email" type="email" maxlength="254"
+                        autocomplete="email"
+                        value="{{ form_data.get('email', current_user.email or '') }}"
+                        required
+                    >
+                    <label for="profile-phone">{{ t('Утасны дугаар') }}</label>
+                    <input
+                        id="profile-phone" name="phone" type="tel" minlength="8" maxlength="20"
+                        pattern="[0-9+(). -]{8,20}"
+                        placeholder="{{ t('99112233 эсвэл +976 99112233') }}" autocomplete="tel"
+                        value="{{ form_data.get('phone', current_user.phone or '') }}"
+                        required
+                    >
+                    <button class="button primary" type="submit">{{ t('Мэдээлэл хадгалах') }}</button>
+                </form>
+            </div>
+            <a class="text-link profile-program-link" href="{{ url_for('hutulbur') }}">{{ t('Сургалтын хөтөлбөрүүд үзэх →') }}</a>
+        </section>
+    </main>
+    <footer class="footer">
+        <a class="footer-brand" href="{{ url_for('index') }}">{{ t('Мэргэжлийн сургалт') }}</a>
+        <p>© {{ current_year }} {{ t('Бүх эрх хуулиар хамгаалагдсан.') }}</p>
+        <a class="footer-social" href="https://www.facebook.com/groups/718571728566109/" target="_blank" rel="noopener noreferrer">{{ t('Facebook хуудас ↗') }}</a>
+        <a class="back-top" href="#top">{{ t('Дээш буцах ↑') }}</a>
+    </footer>
+</body>
+</html>

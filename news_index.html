@@ -1,0 +1,46 @@
+<!DOCTYPE html>
+<html lang="{{ language }}">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="{{ t('Мэргэжлийн сургалтын мэдээ, мэдээлэл.') }}">
+    <title>{{ t('Мэдээ, мэдээлэл') }} | {{ site_name }}</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css', v=62) }}">
+</head>
+<body>
+    {% include "_header.html" %}
+    <main class="section news-section">
+        <div class="section-heading centered">
+            <span class="eyebrow blue">{{ t('МЭДЭЭ, МЭДЭЭЛЭЛ') }}</span>
+            <h2>{{ t('Сургалтын байгууллагын мэдээ') }}</h2>
+            <p>{{ t('Шинэ мэдээлэл, зарлалууд.') }}</p>
+        </div>
+        {% if articles %}
+        <div class="news-grid">
+            {% for article in articles %}
+            <a class="news-card" href="{{ url_for('news.detail', news_id=article.id) }}">
+                {% if article.image_filename %}
+                <img class="news-image" src="{{ url_for('news.media', filename=article.image_filename) }}" alt="{{ article.title }}">
+                {% else %}
+                <div class="news-visual visual-{{ loop.cycle('one', 'two', 'three') }}">{{ t('МЭДЭЭ') }}</div>
+                {% endif %}
+                <div class="news-body">
+                    <span class="news-category">{{ t('ЗАРЛАЛ') if article.category == "announcement" else t('МЭДЭЭ') }} · {{ article.created_at }}</span>
+                    <h3>{{ article.title }}</h3>
+                    <p>{{ article.summary }}</p>
+                </div>
+            </a>
+            {% endfor %}
+        </div>
+        {% else %}
+        <p class="news-empty">{{ t('Одоогоор нийтлэгдсэн мэдээ алга.') }}</p>
+        {% endif %}
+    </main>
+    <footer class="footer">
+        <a class="footer-brand" href="{{ url_for('index') }}">{{ t('Мэргэжлийн сургалт') }}</a>
+        <p>© {{ current_year }} {{ t('Бүх эрх хуулиар хамгаалагдсан.') }}</p>
+        <a class="footer-social" href="https://www.facebook.com/groups/718571728566109/" target="_blank" rel="noopener noreferrer">{{ t('Facebook хуудас ↗') }}</a>
+        <a class="back-top" href="#top">{{ t('Дээш буцах ↑') }}</a>
+    </footer>
+</body>
+</html>

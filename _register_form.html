@@ -1,0 +1,23 @@
+<section class="auth-card" id="register" aria-labelledby="register-title">
+    <span class="eyebrow blue">{{ t('ШИНЭ БҮРТГЭЛ') }}</span>
+    <h2 id="register-title">{{ t('Бүртгүүлэх') }}</h2>
+    <p class="auth-description">{{ t('Хувийн мэдээллээ бүртгүүлж суралцагчийн профайл үүсгэнэ үү.') }}</p>
+    <form class="auth-form" method="post" action="{{ url_for('register') }}">
+        <input type="hidden" name="csrf_token" value="{{ csrf_token }}">
+        <label for="register-full-name">{{ t('Овог нэр') }}</label>
+        <input id="register-full-name" name="full_name" type="text" maxlength="100" autocomplete="name" value="{{ form_data.get('full_name', '') }}" required>
+        <label for="register-username">{{ t('Нэвтрэх нэр') }}</label>
+        <input id="register-username" name="username" type="text" minlength="3" maxlength="32" pattern="[A-Za-z0-9_.-]{3,32}" autocomplete="username" value="{{ form_data.get('username', '') }}" required>
+        <label for="register-email">{{ t('Gmail / имэйл') }}</label>
+        <input id="register-email" name="email" type="email" maxlength="254" autocomplete="email" value="{{ form_data.get('email', '') }}" required>
+        <label for="register-phone">{{ t('Утасны дугаар') }}</label>
+        <input id="register-phone" name="phone" type="tel" minlength="8" maxlength="20" pattern="[0-9+(). -]{8,20}" placeholder="{{ t('99112233 эсвэл +976 99112233') }}" autocomplete="tel" value="{{ form_data.get('phone', '') }}" required>
+        <label for="register-password">{{ t('Нууц үг (10-аас доошгүй тэмдэгт)') }}</label>
+        <input id="register-password" name="password" type="password" minlength="10" maxlength="128" autocomplete="new-password" required>
+        <label for="register-password-confirmation">{{ t('Нууц үг давтах') }}</label>
+        <input id="register-password-confirmation" name="password_confirmation" type="password" minlength="10" maxlength="128" autocomplete="new-password" required>
+        <button class="button" type="submit">{{ t('Бүртгэл үүсгэх') }}</button>
+    </form>
+    <p class="auth-switch">{{ t('Бүртгэлтэй юу?') }}</p>
+    <a class="auth-switch-button" href="{{ url_for('index', _anchor='login') }}">{{ t('Нэвтрэх') }}</a>
+</section>

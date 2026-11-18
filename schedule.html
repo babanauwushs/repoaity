@@ -1,0 +1,88 @@
+<!DOCTYPE html>
+<html lang="{{ language }}">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="{{ t('Их Засаг Политехник коллежийн хичээлийн хуваарийн загвар.') }}">
+    <title>{{ t('Хичээлийн хуваарь') }} | {{ site_name }}</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css', v=62) }}">
+</head>
+<body>
+    {% include "_header.html" %}
+
+    <main class="section schedule-page">
+        <div class="section-heading centered">
+            <span class="eyebrow blue">{{ t('СУРАЛЦАГЧДАД') }}</span>
+            <h2>{{ t('Хичээлийн хуваарь') }}</h2>
+            <p>
+                {% if schedule_entries %}
+                {{ t('Сургалтын албанаас оруулсан долоо хоногийн хичээлийн хуваарь.') }}
+                {% else %}
+                {{ t('Хичээлийн хуваарь хараахан нийтлэгдээгүй байна.') }}
+                {% endif %}
+            </p>
+        </div>
+        {% if classes %}
+        <form class="schedule-class-picker" action="{{ url_for('schedule') }}" method="get">
+            <label for="schedule-class">{{ t('Анги сонгох') }}</label>
+            <select id="schedule-class" name="class_id">
+                {% for class_item in classes %}
+                <option value="{{ class_item.id }}" {% if selected_class and class_item.id == selected_class.id %}selected{% endif %}>
+                    {{ class_item.name }}
+                </option>
+                {% endfor %}
+            </select>
+            <button class="button primary" type="submit">{{ t('Хуваарь харах') }}</button>
+        </form>
+        {% endif %}
+        {% if not classes %}
+        <div class="schedule-notice" role="note">
+            <strong>{{ t('Анхааруулга') }}</strong>
+            <p>{{ t('Сургалтын алба хуваарийг админ хэсгээс оруулсны дараа энд харагдана.') }}</p>
+        </div>
+        {% endif %}
+        {% if selected_class %}
+        <div class="schedule-table-wrap">
+            <table class="schedule-table">
+                <caption>{{ selected_class.name }} · {{ t('Долоо хоногийн хичээлийн хуваарь') }}</caption>
+                <thead>
+                    <tr>
+                        <th scope="col">{{ t('Цагийн дугаар') }}</th>
+                        {% for day in day_labels %}
+                        <th scope="col">{{ t(day) }}</th>
+                        {% endfor %}
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for period in range(1, 6) %}
+                    <tr>
+                        <th scope="row">{{ period }}</th>
+                        {% for day in range(5) %}
+                        {% set entry = schedule_entries.get((period, day)) %}
+                        <td>
+                            {% if entry %}
+                            <strong>{{ entry.subject }}</strong>
+                            {% if entry.teacher %}<span>{{ entry.teacher }}</span>{% endif %}
+                            {% if entry.room %}<span>{{ t('Өрөө') }}: {{ entry.room }}</span>{% endif %}
+                            {% else %}—{% endif %}
+                        </td>
+                        {% endfor %}
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+        {% if schedule_entries %}
+        <p class="schedule-contact">{{ t('Хуваарийн шинэчлэлийг сургалтын алба хариуцна.') }}</p>
+        {% endif %}
+        {% endif %}
+    </main>
+
+    <footer class="footer">
+        <a class="footer-brand" href="{{ url_for('index') }}">{{ t('Мэргэжлийн сургалт') }}</a>
+        <p>© {{ current_year }} {{ t('Бүх эрх хуулиар хамгаалагдсан.') }}</p>
+        <a class="footer-social" href="https://www.facebook.com/groups/718571728566109/" target="_blank" rel="noopener noreferrer">{{ t('Facebook хуудас ↗') }}</a>
+        <a class="back-top" href="#top">{{ t('Дээш буцах ↑') }}</a>
+    </footer>
+</body>
+</html>

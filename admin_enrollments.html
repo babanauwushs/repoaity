@@ -1,0 +1,63 @@
+<!DOCTYPE html>
+<html lang="{{ language }}">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="{{ t('Элсэлтийн хүсэлтүүдийг харах админ хуудас.') }}">
+    <title>{{ t('Элсэлтийн хүсэлтүүд | Админ') }} | {{ site_name }}</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css', v=62) }}">
+</head>
+<body>
+    {% include "_header.html" %}
+    <main class="admin-page">
+        <div class="admin-heading">
+            <span class="eyebrow blue">{{ t('УДИРДЛАГА') }}</span>
+            <h2>{{ t('Элсэлтийн хүсэлтүүд') }}</h2>
+            <p>{{ t('Ирсэн элсэлтийн мэдээллийг зөвхөн админ харах боломжтой.') }}</p>
+            <a class="admin-button admin-news-link" href="{{ url_for('admin') }}">{{ t('Админ самбар руу буцах') }}</a>
+        </div>
+        {% include "_flashes.html" %}
+        <section class="admin-section" aria-label="{{ t('Элсэлтийн хүсэлтүүд') }}">
+            <div class="admin-table-wrap">
+                <table class="admin-table">
+                    <thead>
+                        <tr>
+                            <th>{{ t('Дугаар') }}</th>
+                            <th>{{ t('Овог, нэр') }}</th>
+                            <th>{{ t('Төрсөн огноо') }}</th>
+                            <th>{{ t('Холбоо барих') }}</th>
+                            <th>Facebook</th>
+                            <th>{{ t('Хаяг') }}</th>
+                            <th>{{ t('Хөтөлбөр') }}</th>
+                            <th>{{ t('Илгээсэн') }}</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for application in applications %}
+                        <tr>
+                            <td>{{ application.registration_number }}</td>
+                            <td>{{ application.surname }} {{ application.first_name }}</td>
+                            <td>{{ application.date_of_birth }}</td>
+                            <td>
+                                <a href="mailto:{{ application.email }}">{{ application.email }}</a><br>
+                                <a href="tel:{{ application.phone }}">{{ application.phone }}</a>
+                            </td>
+                            <td>
+                                {% if application.facebook_url %}
+                                <a href="{{ application.facebook_url }}" target="_blank" rel="noopener noreferrer">{{ t('Профайл нээх') }}</a>
+                                {% else %}—{% endif %}
+                            </td>
+                            <td>{{ application.address }}</td>
+                            <td>{{ application.program_name }}</td>
+                            <td>{{ application.created_at }}</td>
+                        </tr>
+                        {% else %}
+                        <tr><td colspan="8">{{ t('Одоогоор элсэлтийн хүсэлт ирээгүй байна.') }}</td></tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </section>
+    </main>
+</body>
+</html>

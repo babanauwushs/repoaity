@@ -1,0 +1,82 @@
+<!DOCTYPE html>
+<html lang="{{ language }}">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="{{ t('Админ самбарт мэдээ нэмэх эсвэл засах.') }}">
+    <title>{{ t(page_title) }} | {{ t('Админ') }} | {{ site_name }}</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css', v=62) }}">
+</head>
+<body>
+    {% include "_header.html" %}
+    <main class="section news-admin-page">
+        {% include "_flashes.html" %}
+        <section class="auth-card">
+            <span class="eyebrow blue">{{ t('МЭДЭЭ УДИРДАХ') }}</span>
+            <h2>{{ t(page_title) }}</h2>
+            <form class="auth-form" method="post" enctype="multipart/form-data">
+                <input type="hidden" name="csrf_token" value="{{ csrf_token }}">
+                <label for="news-title">{{ t('Гарчиг') }}</label>
+                <input id="news-title" name="title" maxlength="150" value="{{ article.title }}" required>
+                <label for="news-category">{{ t('Төрөл') }}</label>
+                <select id="news-category" name="category" required>
+                    <option value="news" {% if article.category == "news" %}selected{% endif %}>{{ t('Мэдээ') }}</option>
+                    <option value="announcement" {% if article.category == "announcement" %}selected{% endif %}>{{ t('Зарлал') }}</option>
+                </select>
+                <label for="news-summary">{{ t('Товч агуулга') }}</label>
+                <textarea id="news-summary" name="summary" maxlength="300" rows="3" required>{{ article.summary }}</textarea>
+                <label for="news-body">{{ t('Мэдээний дэлгэрэнгүй') }}</label>
+                <textarea id="news-body" name="body" maxlength="20000" rows="10" required>{{ article.body }}</textarea>
+                <label for="news-image">{{ t('Мэдээний зураг (JPG, PNG эсвэл WEBP; 5 МБ хүртэл)') }}</label>
+                <input id="news-image" name="image" type="file" accept=".jpg,.jpeg,.png,.webp,image/jpeg,image/png,image/webp">
+                <img
+                    id="news-image-preview"
+                    class="news-image-preview"
+                    {% if article.image_filename %}src="{{ url_for('news.media', filename=article.image_filename) }}"{% endif %}
+                    alt="{{ t('Сонгосон мэдээний зургийн урьдчилсан харагдац') }}"
+                    {% if not article.image_filename %}hidden{% endif %}
+                >
+                {% if article.image_filename %}
+                <label class="news-image-remove">
+                    <input type="checkbox" name="remove_image" value="1">
+                    {{ t('Одоогийн зургийг устгах') }}
+                </label>
+                {% endif %}
+                <label for="news-status">{{ t('Нийтлэлийн төлөв') }}</label>
+                <select id="news-status" name="is_published" required>
+                    <option value="0" {% if not article.is_published %}selected{% endif %}>{{ t('Ноорог болгон хадгалах') }}</option>
+                    <option value="1" {% if article.is_published %}selected{% endif %}>{{ t('Нийтлэх') }}</option>
+                </select>
+                <button class="button" type="submit">{{ t('Хадгалах') }}</button>
+            </form>
+            <p class="auth-switch"><a href="{{ url_for('news.manage') }}">{{ t('Мэдээний жагсаалт руу буцах') }}</a></p>
+        </section>
+    </main>
+    <script>
+        const imageInput = document.getElementById("news-image");
+        const imagePreview = document.getElementById("news-image-preview");
+        const originalImage = imagePreview.getAttribute("src");
+        let previewUrl;
+
+        imageInput.addEventListener("change", () => {
+            if (previewUrl) {
+                URL.revokeObjectURL(previewUrl);
+                previewUrl = undefined;
+            }
+
+            const imageFile = imageInput.files[0];
+            if (imageFile) {
+                previewUrl = URL.createObjectURL(imageFile);
+                imagePreview.src = previewUrl;
+                imagePreview.hidden = false;
+            } else if (originalImage) {
+                imagePreview.src = originalImage;
+                imagePreview.hidden = false;
+            } else {
+                imagePreview.removeAttribute("src");
+                imagePreview.hidden = true;
+            }
+        });
+    </script>
+</body>
+</html>

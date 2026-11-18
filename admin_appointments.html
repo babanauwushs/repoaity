@@ -1,0 +1,103 @@
+<!DOCTYPE html>
+<html lang="{{ language }}">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="{{ t('Захирлын сул цаг болон уулзалтын хүсэлтүүдийг удирдах.') }}">
+    <title>{{ t('Уулзалтын хуваарь') }} | {{ t('Админ') }} | {{ site_name }}</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css', v=62) }}">
+</head>
+<body>
+    {% include "_header.html" %}
+    <main class="admin-page">
+        <div class="admin-heading">
+            <span class="eyebrow blue">{{ t('УДИРДЛАГА') }}</span>
+            <h2>{{ t('Захирлын уулзалтын хуваарь') }}</h2>
+            <p>{{ t('30 минутын сул цаг нэмж, захиалсан уулзалтуудыг эндээс удирдана.') }} {{ t('Цаг Улаанбаатарын цагаар.') }} {{ t('Захиалгатай цагийг өөрчлөхийн тулд эхлээд уулзалтыг цуцална уу.') }}</p>
+            <a class="text-link" href="{{ url_for('admin') }}">{{ t('← Админ самбар руу буцах') }}</a>
+        </div>
+        {% include "_flashes.html" %}
+
+        <section class="admin-section appointment-admin-section" aria-labelledby="add-slot-title">
+            <h3 id="add-slot-title">{{ t('Сул цаг нэмэх') }}</h3>
+            <form class="appointment-slot-form" action="{{ url_for('create_appointment_slot') }}" method="post">
+                <input type="hidden" name="csrf_token" value="{{ csrf_token }}">
+                <label for="slot-date">{{ t('Огноо') }}</label>
+                <input id="slot-date" name="date" type="date" min="{{ today }}" required>
+                <label for="slot-time">{{ t('Эхлэх цаг (30 минут тутамд)') }}</label>
+                <input id="slot-time" name="time" type="time" step="1800" required>
+                <button class="admin-button" type="submit">{{ t('30 минутын сул цаг нэмэх') }}</button>
+            </form>
+        </section>
+
+        <section class="admin-section appointment-admin-section" aria-labelledby="slots-title">
+            <h3 id="slots-title">{{ t('Сул цаг ба уулзалтын захиалгууд') }}</h3>
+            <div class="admin-table-wrap">
+                <table class="admin-table">
+                    <thead>
+                        <tr>
+                            <th>{{ t('Огноо, цаг') }}</th>
+                            <th>{{ t('Төлөв') }}</th>
+                            <th>{{ t('Нэр') }}</th>
+                            <th>{{ t('Холбоо барих') }}</th>
+                            <th>{{ t('Уулзалтын шалтгаан') }}</th>
+                            <th>{{ t('Үйлдэл') }}</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for slot in slots %}
+                        <tr>
+                            {% if slot.booking_id %}
+                            <td>{{ slot.starts_at }}</td>
+                            <td>{{ t('Захиалсан') }}</td>
+                            <td>{{ slot.name }}</td>
+                            <td>
+                                <a href="mailto:{{ slot.email }}">{{ slot.email }}</a><br>
+                                <a href="tel:{{ slot.phone }}">{{ slot.phone }}</a>
+                            </td>
+                            <td class="contact-message-cell">{{ slot.reason }}</td>
+                            <td>
+                                <form action="{{ url_for('cancel_appointment', booking_id=slot.booking_id) }}" method="post"
+                                      onsubmit="return confirm('{{ t('Энэ уулзалтыг цуцлах уу?') }}');">
+                                    <input type="hidden" name="csrf_token" value="{{ csrf_token }}">
+                                    <button class="admin-button danger" type="submit">{{ t('Цуцлах') }}</button>
+                                </form>
+                            </td>
+                            {% else %}
+                            <td>
+                                <form id="update-slot-{{ slot.id }}" class="appointment-slot-edit"
+                                      action="{{ url_for('update_appointment_slot', slot_id=slot.id) }}" method="post">
+                                    <input type="hidden" name="csrf_token" value="{{ csrf_token }}">
+                                    <label class="visually-hidden" for="slot-date-{{ slot.id }}">{{ t('Огноо') }}</label>
+                                    <input id="slot-date-{{ slot.id }}" name="date" type="date"
+                                           min="{{ today }}" value="{{ slot.starts_at[:10] }}" required>
+                                    <label class="visually-hidden" for="slot-time-{{ slot.id }}">{{ t('Эхлэх цаг (30 минут тутамд)') }}</label>
+                                    <input id="slot-time-{{ slot.id }}" name="time" type="time" step="1800"
+                                           value="{{ slot.starts_at[11:16] }}" required>
+                                </form>
+                            </td>
+                            <td>{{ t('Сул') }}</td>
+                            <td>—</td>
+                            <td>—</td>
+                            <td>—</td>
+                            <td>
+                                <div class="appointment-slot-actions">
+                                    <button class="admin-button" type="submit" form="update-slot-{{ slot.id }}">{{ t('Хадгалах') }}</button>
+                                    <form action="{{ url_for('delete_appointment_slot', slot_id=slot.id) }}" method="post">
+                                    <input type="hidden" name="csrf_token" value="{{ csrf_token }}">
+                                    <button class="admin-button danger" type="submit">{{ t('Устгах') }}</button>
+                                    </form>
+                                </div>
+                            </td>
+                            {% endif %}
+                        </tr>
+                        {% else %}
+                        <tr><td colspan="6">{{ t('Уулзалтын сул цаг хараахан нэмээгүй байна.') }}</td></tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </section>
+    </main>
+</body>
+</html>

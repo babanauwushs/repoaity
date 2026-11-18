@@ -1,0 +1,84 @@
+<!DOCTYPE html>
+<html lang="{{ language }}">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="{{ t('Мэргэжлийн сургалтын хөтөлбөрт элсэх хүсэлтээ илгээнэ үү.') }}">
+    <title>{{ t('Элсэлтийн хүсэлт') }} | {{ site_name }}</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css', v=62) }}">
+</head>
+<body>
+    <a class="skip-link" href="#enrollment-form">{{ t('Маягт руу очих') }}</a>
+    {% include "_header.html" %}
+
+    <main class="enrollment-page" id="main-content">
+        {% include "_flashes.html" %}
+        <div class="enrollment-heading">
+            <span class="eyebrow">{{ t('СУРАЛЦАХ ЗАМНАЛАА ЭХЛҮҮЛЭХ') }}</span>
+            <h2>{{ t('Элсэлтийн хүсэлт') }}</h2>
+            <p>{{ t('Мэдээллээ бүрэн оруулж илгээнэ үү. * тэмдэгтэй талбарууд заавал бөглөнө.') }}</p>
+        </div>
+        <form class="enrollment-form" id="enrollment-form" action="{{ url_for('enroll') }}" method="post">
+            <input type="hidden" name="csrf_token" value="{{ csrf_token }}">
+            <div class="enrollment-fields">
+                <div class="enrollment-field">
+                    <label for="enrollment-number">{{ t('Бүртгэлийн дугаар *') }}</label>
+                    <input id="enrollment-number" name="registration_number" type="text"
+                           maxlength="50" pattern="[A-Za-z0-9._/-]{1,50}"
+                           value="{{ form_data.get('registration_number', '') }}" required>
+                </div>
+                <div class="enrollment-field">
+                    <label for="enrollment-surname">{{ t('Овог *') }}</label>
+                    <input id="enrollment-surname" name="surname" type="text" maxlength="100"
+                           autocomplete="family-name" value="{{ form_data.get('surname', '') }}" required>
+                </div>
+                <div class="enrollment-field">
+                    <label for="enrollment-first-name">{{ t('Нэр *') }}</label>
+                    <input id="enrollment-first-name" name="first_name" type="text" maxlength="100"
+                           autocomplete="given-name" value="{{ form_data.get('first_name', '') }}" required>
+                </div>
+                <div class="enrollment-field">
+                    <label for="enrollment-birth-date">{{ t('Төрсөн огноо *') }}</label>
+                    <input id="enrollment-birth-date" name="date_of_birth" type="date"
+                           max="{{ current_year }}-12-31"
+                           value="{{ form_data.get('date_of_birth', '') }}" required>
+                </div>
+                <div class="enrollment-field">
+                    <label for="enrollment-email">{{ t('Gmail / имэйл *') }}</label>
+                    <input id="enrollment-email" name="email" type="email" maxlength="254"
+                           autocomplete="email" value="{{ form_data.get('email', '') }}" required>
+                </div>
+                <div class="enrollment-field">
+                    <label for="enrollment-phone">{{ t('Утасны дугаар *') }}</label>
+                    <input id="enrollment-phone" name="phone" type="tel" minlength="8" maxlength="20"
+                           pattern="[0-9+(). -]{8,20}" placeholder="{{ t('99112233') }}"
+                           autocomplete="tel" value="{{ form_data.get('phone', '') }}" required>
+                </div>
+                <div class="enrollment-field enrollment-field-wide">
+                    <label for="enrollment-facebook">{{ t('Facebook хаягийн холбоос') }}</label>
+                    <input id="enrollment-facebook" name="facebook_url" type="url" maxlength="500"
+                           placeholder="https://www.facebook.com/..."
+                           value="{{ form_data.get('facebook_url', '') }}">
+                </div>
+                <div class="enrollment-field enrollment-field-wide">
+                    <label for="enrollment-address">{{ t('Оршин суугаа хаяг *') }}</label>
+                    <textarea id="enrollment-address" name="address" maxlength="500" rows="3"
+                              autocomplete="street-address" required>{{ form_data.get('address', '') }}</textarea>
+                </div>
+                <div class="enrollment-field enrollment-field-wide">
+                    <label for="enrollment-program">{{ t('Сонгох хөтөлбөр *') }}</label>
+                    <select id="enrollment-program" name="program_slug" required>
+                        <option value="">{{ t('Хөтөлбөр сонгоно уу') }}</option>
+                        {% for slug, program in programs.items() %}
+                        <option value="{{ slug }}" {% if form_data.get('program_slug') == slug %}selected{% endif %}>
+                            {{ t(program.name) }}
+                        </option>
+                        {% endfor %}
+                    </select>
+                </div>
+            </div>
+            <button class="button enrollment-submit" type="submit">{{ t('Элсэх хүсэлт илгээх') }} <span aria-hidden="true">→</span></button>
+        </form>
+    </main>
+</body>
+</html>

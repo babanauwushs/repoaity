@@ -1,0 +1,67 @@
+<!DOCTYPE html>
+<html lang="{{ language }}">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="{{ t('Сургалтын хөтөлбөр, мэдээ, зарлалаас хайх.') }}">
+    <title>{{ t('Хайлт') }} | {{ site_name }}</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css', v=62) }}">
+</head>
+<body>
+    {% include "_header.html" %}
+    <main class="section search-page">
+        <header class="search-heading">
+            <span class="eyebrow blue">{{ t('САЙТААС ХАЙХ') }}</span>
+            <h2>{{ t('Хайлтын үр дүн') }}</h2>
+            {% if query %}
+            <p>{{ t('“') }}{{ query }}{{ t('” гэсэн хайлтаар олдсон үр дүн') }}</p>
+            {% else %}
+            <p>{{ t('Хайх үгээ дээрх талбарт оруулна уу.') }}</p>
+            {% endif %}
+        </header>
+
+        {% if query and not program_results and not news_results %}
+        <p class="search-empty">{{ t('Тохирох үр дүн олдсонгүй. Өөр түлхүүр үгээр дахин хайна уу.') }}</p>
+        {% endif %}
+
+        {% if program_results %}
+        <section class="search-results" aria-labelledby="search-programs-title">
+            <h3 id="search-programs-title">{{ t('Сургалтын хөтөлбөр') }} ({{ program_results|length }})</h3>
+            <div class="search-result-list">
+                {% for program in program_results %}
+                <article class="search-result">
+                    <span class="search-result-type">{{ t('ХӨТӨЛБӨР') }}</span>
+                    <h4><a href="{{ url_for('program_detail', program_slug=program.slug) }}">{{ t(program.name) }}</a></h4>
+                    <p>{{ t(program.description) }}</p>
+                </article>
+                {% endfor %}
+            </div>
+        </section>
+        {% endif %}
+
+        {% if news_results %}
+        <section class="search-results" aria-labelledby="search-news-title">
+            <h3 id="search-news-title">{{ t('Мэдээ, зарлал') }} ({{ news_results|length }})</h3>
+            <div class="search-result-list">
+                {% for article in news_results %}
+                <article class="search-result">
+                    <span class="search-result-type">
+                        {{ t('ЗАРЛАЛ') if article.category == "announcement" else t('МЭДЭЭ') }}
+                    </span>
+                    <h4><a href="{{ url_for('news.detail', news_id=article.id) }}">{{ article.title }}</a></h4>
+                    <p>{{ article.summary }}</p>
+                    <time datetime="{{ article.created_at|replace(' ', 'T') }}">{{ article.created_at }}</time>
+                </article>
+                {% endfor %}
+            </div>
+        </section>
+        {% endif %}
+    </main>
+    <footer class="footer">
+        <a class="footer-brand" href="{{ url_for('index') }}">{{ t('Мэргэжлийн сургалт') }}</a>
+        <p>© {{ current_year }} {{ t('Бүх эрх хуулиар хамгаалагдсан.') }}</p>
+        <a class="footer-social" href="https://www.facebook.com/groups/718571728566109/" target="_blank" rel="noopener noreferrer">{{ t('Facebook хуудас ↗') }}</a>
+        <a class="back-top" href="#top">{{ t('Дээш буцах ↑') }}</a>
+    </footer>
+</body>
+</html>

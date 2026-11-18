@@ -1,0 +1,112 @@
+<!DOCTYPE html>
+<html lang="{{ language }}">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="{{ t('Админ самбар.') }}">
+    <title>{{ t('Админ самбар') }} | {{ site_name }}</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css', v=62) }}">
+</head>
+<body>
+    {% include "_header.html" %}
+    <main class="admin-page">
+        <div class="admin-heading">
+            <span class="eyebrow blue">{{ t('УДИРДЛАГА') }}</span>
+            <h2>{{ t('Админ самбар') }}</h2>
+            <p>{{ t('Хэрэглэгчид болон сургалтын хөтөлбөрийн мэдээллийг удирдана.') }}</p>
+            <a class="admin-button admin-news-link" href="{{ url_for('admin_news') }}">{{ t('Мэдээ удирдах') }}</a>
+            <a class="admin-button admin-news-link" href="{{ url_for('admin_messages') }}">{{ t('Санал хүсэлтийн тайлан') }}</a>
+            <a class="admin-button admin-news-link" href="{{ url_for('admin_enrollments') }}">{{ t('Элсэлтийн хүсэлтүүд') }}</a>
+            <a class="admin-button admin-news-link" href="{{ url_for('admin_appointments') }}">{{ t('Уулзалтын хуваарь') }}</a>
+            <a class="admin-button admin-news-link" href="{{ url_for('admin_schedule') }}">{{ t('Хичээлийн хуваарь засах') }}</a>
+        </div>
+        {% include "_flashes.html" %}
+
+        <section class="admin-stats" aria-label="{{ t('Ерөнхий статистик') }}">
+            <article class="admin-stat"><span>{{ t('Хэрэглэгч') }}</span><strong>{{ statistics.users }}</strong></article>
+            <article class="admin-stat"><span>{{ t('Админ') }}</span><strong>{{ statistics.admins }}</strong></article>
+            <article class="admin-stat"><span>{{ t('Хөтөлбөр') }}</span><strong>{{ statistics.programs }}</strong></article>
+            <article class="admin-stat"><span>{{ t('Ирсэн санал хүсэлт') }}</span><strong>{{ statistics.messages }}</strong></article>
+            <article class="admin-stat"><span>{{ t('Элсэлтийн хүсэлт') }}</span><strong>{{ statistics.enrollments }}</strong></article>
+            <article class="admin-stat"><span>{{ t('Уулзалтын захиалга') }}</span><strong>{{ statistics.appointments }}</strong></article>
+        </section>
+
+        <section class="admin-section" aria-labelledby="users-title">
+            <h3 id="users-title">{{ t('Хэрэглэгчид') }}</h3>
+            <div class="admin-table-wrap">
+                <table class="admin-table">
+                    <thead>
+                        <tr>
+                            <th>{{ t('Нэвтрэх нэр') }}</th>
+                            <th>{{ t('Имэйл') }}</th>
+                            <th>{{ t('Утас') }}</th>
+                            <th>{{ t('Эрх') }}</th>
+                            <th>{{ t('Бүртгүүлсэн') }}</th>
+                            <th>{{ t('Үйлдэл') }}</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for user in users %}
+                        <tr>
+                            <td>{{ user.username }}{% if user.id == current_user.id %} ({{ t('та') }}){% endif %}</td>
+                            <td>{{ user.email or "—" }}</td>
+                            <td>{{ user.phone or "—" }}</td>
+                            <td>
+                                <form class="admin-inline-form" action="{{ url_for('update_user_role', user_id=user.id) }}" method="post">
+                                    <input type="hidden" name="csrf_token" value="{{ csrf_token }}">
+                                    <label class="visually-hidden" for="role-{{ user.id }}">{{ user.username }} {{ t('хэрэглэгчийн эрх') }}</label>
+                                    <select id="role-{{ user.id }}" name="role">
+                                        <option value="student" {% if user.role == "student" %}selected{% endif %}>{{ t('Суралцагч') }}</option>
+                                        <option value="admin" {% if user.role == "admin" %}selected{% endif %}>{{ t('Админ') }}</option>
+                                    </select>
+                                    <button class="admin-button" type="submit">{{ t('Хадгалах') }}</button>
+                                </form>
+                            </td>
+                            <td>{{ user.created_at }}</td>
+                            <td>
+                                {% if user.id != current_user.id %}
+                                <form class="admin-inline-form" action="{{ url_for('delete_user', user_id=user.id) }}" method="post" onsubmit="return confirm('Энэ хэрэглэгчийг устгах уу?');">
+                                    <input type="hidden" name="csrf_token" value="{{ csrf_token }}">
+                                    <button class="admin-button danger" type="submit">{{ t('Устгах') }}</button>
+                                </form>
+                                {% else %}
+                                <span>{{ t('Өөрийн бүртгэл') }}</span>
+                                {% endif %}
+                            </td>
+                        </tr>
+                        {% else %}
+                        <tr><td colspan="6">{{ t('Бүртгэлтэй хэрэглэгч алга.') }}</td></tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </section>
+
+        <section class="admin-section" aria-labelledby="programs-title">
+            <h3 id="programs-title">{{ t('Хөтөлбөрүүд') }}</h3>
+            <div class="admin-program-grid">
+                {% for slug, program in programs.items() %}
+                <details class="admin-program-card">
+                    <summary>
+                        <span>{{ program.name }}</span>
+                        <span class="admin-program-toggle" aria-hidden="true"></span>
+                    </summary>
+                    <form class="admin-program-form" action="{{ url_for('update_program', slug=slug) }}" method="post">
+                        <input type="hidden" name="csrf_token" value="{{ csrf_token }}">
+                        <label for="program-icon-{{ slug }}">{{ t('Тэмдэг') }}</label>
+                        <input id="program-icon-{{ slug }}" name="icon" maxlength="16" value="{{ program.icon }}" required>
+                        <label for="program-name-{{ slug }}">{{ t('Нэр') }}</label>
+                        <input id="program-name-{{ slug }}" name="name" maxlength="100" value="{{ program.name }}" required>
+                        <label for="program-description-{{ slug }}">{{ t('Тайлбар') }}</label>
+                        <textarea id="program-description-{{ slug }}" name="description" maxlength="1000" rows="4" required>{{ program.description }}</textarea>
+                        <label for="program-skills-{{ slug }}">{{ t('Ур чадварууд (мөр бүр нэг чадвар)') }}</label>
+                        <textarea id="program-skills-{{ slug }}" name="skills" maxlength="2020" rows="6" required>{{ program.skills|join('\n') }}</textarea>
+                        <button class="admin-button" type="submit">{{ t('Хөтөлбөр хадгалах') }}</button>
+                    </form>
+                </details>
+                {% endfor %}
+            </div>
+        </section>
+    </main>
+</body>
+</html>
